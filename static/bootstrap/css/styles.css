@@ -1,0 +1,75 @@
+h1{
+	margin-top:5% !important;
+}
+
+.navbar-inner1 {
+  background-color: #fff !important;  /* background color will be black for all browsers */
+  background-image: none;
+  background-repeat: no-repeat;
+  filter: none;  
+}
+
+ul {
+	list-style-type:none;
+}
+
+.tasks {
+	list-style-type:circle;
+}
+.tasks2 {
+	list-style-type:circle;
+	font-color:#C0C0C0 !important;
+}
+
+.xhr {
+	text-decoration:none !important;
+	color:black;
+}
+.xhr:hover {
+	text-decoration:none !important;
+	color:red;
+}
+
+.xhrr {
+	text-decoration:none !important;
+	color:black;
+}
+.xhrr:hover {
+	text-decoration:none !important;
+	color:red;
+}
+
+form textarea {
+height:200px !important; 
+}
+
+.blogpost{
+	height: 450px !important;
+}
+
+.clear{
+	clear:both;
+}
+
+.showComments{
+	margin-left:5px;
+}
+
+.comms{
+	margin-left:50px;
+}
+#pComms{
+	margin-left:50px;
+}
+
+#pComms textarea{
+	height:50px !important;
+}
+
+#actcomment{
+	
+}
+
+#actcomment:nth-child(even){
+	background: #f1f3f5;
+}

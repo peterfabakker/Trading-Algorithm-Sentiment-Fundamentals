@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<br>
+<br>
+<br>
+
+<form class="" method="post" enctype="multipart/form-data" action="/home">
+
+<input name="searchQ" type="text" placeholder="searchQ" x-webkit-speech/>
+<br>
+<button type="submit" class="btn btn-info" >	Analyze </button>
+
+{{query}}
+</form>
+{% for article in query.articles %}
+<ul>
+	<li>{{article}}</li>
+</ul>
+{% endfor %}
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,178 @@
+import os
+import datetime
+import webapp2
+import jinja2
+import cgi
+from google.appengine.ext import ndb
+from google.appengine.api import users
+from google.appengine.api import mail
+import urllib
+from google.appengine.api import urlfetch
+
+import pprint
+import json
+from poster.encode import multipart_encode, MultipartParam
+import urllib2
+import base64
+
+
+
+class Articles(ndb.Model):
+	articles = ndb.JsonProperty(repeated=True)
+
+	
+
+class Home1(webapp2.RequestHandler):
+
+	def get(self):
+
+
+		'''
+		def splitParagraphIntoSentences(paragraph):
+    		///break a paragraph into sentences
+    		///and return a list
+    		import re
+    		# to split by multile characters
+
+    		#   regular expressions are easiest (and fastest)
+    		sentenceEnders = re.compile('[.!?]')
+    		sentenceList = sentenceEnders.split(paragraph)
+    		return sentenceList
+
+			p = """This is a sentence.  This is an excited sentence! And do you think this is a question?"""
+			sentences = splitParagraphIntoSentences(p)
+			for s in sentences:
+			print s.strip()
+			'''
+		path = self.request.path
+
+		query = Articles().query()
+		query = query.fetch_page(5)
+
+		tmp = "home22.html"
+
+
+
+		views = os.path.abspath(os.path.join(__file__, os.path.pardir, "../Views"))
+		jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(views))
+
+		template_values = {
+				"path": path,
+				"query":query
+			}
+		template = jinja_environment.get_template(tmp)
+
+		self.response.out.write(template.render(template_values))
+		
+
+	
+	
+	def post(self):
+		
+		text = self.request.get("opinion")
+		searchQ = self.request.get("searchQ")
+		
+
+		'''
+		
+		payload = []
+		payload.append(MultipartParam("text", text))
+		data, headers = multipart_encode(payload)
+		del headers['Content-Length']
+		url = "http://text-processing.com/api/sentiment/"
+		result = urlfetch.fetch(url = url,
+			deadline = 50,
+			method = urlfetch.POST,
+			payload = str().join(data),
+			headers = headers
+		)
+		
+		pageurl = "http://www.thenational.ae/"
+		url = "http://www.diffbot.com/api/frontpage?token="+ token + "&url="+pageurl +"&format=json"
+		
+		result2 = urlfetch.fetch(url = url,
+			deadline = 50
+		)
+		
+		result2 = json.loads(result2.content)
+		print result.content
+		print result2.title
+		d = feedparser.parse('http://news.google.com/news?q=apple&output=rss')
+		print [entry.title for entry in d['entries']
+		'''
+		
+		
+		
+		query = urllib.quote(searchQ)
+		url = "https://api.datamarket.azure.com/Bing/Search/v1/News?Query='%s'&$format=json&$top=5" % query
+		api_key = base64.b64encode(":FDHMFbTf24DhwD0HcZTlN7dNlbSWiiIB2Cc/tp10K7k")
+		rpc = urlfetch.create_rpc()
+		urlfetch.make_fetch_call(rpc,url, headers={"Authorization": "Basic %s" %api_key})
+		result = rpc.get_result()
+		print result.status_code
+		result = json.loads(result.content)
+		
+		rpcs = []
+		urls = []
+		textTitle=[]
+		
+	
+		for article in result['d']['results']:
+			pageurl = article['Url']
+			refcom = {'url':pageurl}
+			urls.append(refcom)
+			token = "39a31e900a5b7a783100556220f3fe35"
+			url = "http://www.diffbot.com/api/article?token="+ token + "&url="+pageurl
+			rpc = urlfetch.create_rpc(deadline=60)
+			urlfetch.make_fetch_call(rpc,url, headers={"Authorization": "Basic %s" %api_key})
+			rpcs.append(rpc)
+			
+		for rpc in rpcs:
+			result = rpc.get_result()
+			print result.status_code
+			result = json.loads(result.content)
+			refcom = {'title':result['title'],'text':result['text']}
+			textTitle.append(refcom)
+			
+		rpcs2 = []
+		for article in textTitle:
+			payload = []
+			payload.append(MultipartParam("text", article['text']))
+			data, headers = multipart_encode(payload)
+			del headers['Content-Length']
+			url = "http://text-processing.com/api/sentiment/"
+			rpc = urlfetch.create_rpc()
+			urlfetch.make_fetch_call(rpc,url,payload =str().join(data),method = urlfetch.POST,headers = headers)
+			rpcs2.append(rpc)
+			
+			
+		scores=[]
+		counter = 0
+		for	rpc in rpcs2:
+			result = rpc.get_result()
+			print result.status_code
+			result = json.loads(result.content)
+			label = result['label']
+			refcom = {'label':result['label'],'probability':result['probability'][label],'title':textTitle[counter]['title'],'url':urls[counter]['url'],'searchQ':searchQ}			
+			scores.append(refcom)
+			counter += 1
+			articles = Articles()
+			articles.articles.append(refcom)
+			articles.put()
+		self.redirect("/home")
+			
+
+	
+			
+			
+		
+			
+		
+		
+		
+		
+		
+		
+		
+		
+		

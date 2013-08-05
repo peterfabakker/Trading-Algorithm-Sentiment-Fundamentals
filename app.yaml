@@ -1,0 +1,45 @@
+application: opinionext
+version: 2
+runtime: python27
+api_version: 1
+threadsafe: true
+
+default_expiration: "7d"
+
+handlers:
+- url: /favicon.ico
+  static_files: images/favicon.png
+  upload: images/favicon.png
+
+- url: /robots.txt
+  static_files: css/robots.txt
+  upload: css/robots.txt
+
+- url: /static
+  static_dir: static
+
+- url: /.*
+  script: main.app
+
+builtins:
+- appstats: on
+
+error_handlers:
+- file: default_error.html
+
+- error_code: over_quota
+  file: over_quota.html
+
+- error_code: dos_api_denial
+  file: dos_api_denial.html
+
+- error_code: timeout
+  file: timeout.html
+
+libraries:
+- name: jinja2
+  version: latest
+
+- name: numpy
+  version: "1.6.1"
+
