@@ -14,7 +14,7 @@ import json
 from poster.encode import multipart_encode, MultipartParam
 import urllib2
 import base64
-
+import oauth
 
 
 class Articles(ndb.Model):
@@ -102,7 +102,7 @@ class Home1(webapp2.RequestHandler):
 		'''
 		
 		
-		
+		'''
 		query = urllib.quote(searchQ)
 		url = "https://api.datamarket.azure.com/Bing/Search/v1/News?Query='%s'&$format=json&$top=5" % query
 		api_key = base64.b64encode(":FDHMFbTf24DhwD0HcZTlN7dNlbSWiiIB2Cc/tp10K7k")
@@ -144,6 +144,12 @@ class Home1(webapp2.RequestHandler):
 			rpc = urlfetch.create_rpc()
 			urlfetch.make_fetch_call(rpc,url,payload =str().join(data),method = urlfetch.POST,headers = headers)
 			rpcs2.append(rpc)
+			
+		'''
+		
+		
+		
+		
 			
 			
 		scores=[]
