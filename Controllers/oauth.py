@@ -60,16 +60,8 @@ from urllib import unquote as urlunquote
 import logging
 
 
-TWITTER = "twitter"
-YAHOO = "yahoo"
-MYSPACE = "myspace"
-DROPBOX = "dropbox"
-LINKEDIN = "linkedin"
-YAMMER = "yammer"
-
-
 class OAuthException(Exception):
-  pass
+    pass
 
 
 def get_oauth_client(service, key, secret, callback_url):
@@ -78,18 +70,12 @@ def get_oauth_client(service, key, secret, callback_url):
   A factory that will return the appropriate OAuth client.
   """
 
-  if service == TWITTER:
+  if service == "twitter":
     return TwitterClient(key, secret, callback_url)
-  elif service == YAHOO:
+  elif service == "yahoo":
     return YahooClient(key, secret, callback_url)
-  elif service == MYSPACE:
+  elif service == "myspace":
     return MySpaceClient(key, secret, callback_url)
-  elif service == DROPBOX:
-    return DropboxClient(key, secret, callback_url)
-  elif service == LINKEDIN:
-    return LinkedInClient(key, secret, callback_url)
-  elif service == YAMMER:
-    return YammerClient(key, secret, callback_url)
   else:
     raise Exception, "Unknown OAuth service %s" % service
 
@@ -124,7 +110,7 @@ class OAuthClient():
     self.callback_url = callback_url
 
   def prepare_request(self, url, token="", secret="", additional_params=None,
-                      method=urlfetch.GET, t=None, nonce=None):
+                      method=urlfetch.GET):
     """Prepare Request.
 
     Prepares an authenticated request to any OAuth protected resource.
@@ -133,13 +119,13 @@ class OAuthClient():
     """
 
     def encode(text):
-      return urlquote(str(text), "~")
+      return urlquote(str(text), "")
 
     params = {
       "oauth_consumer_key": self.consumer_key,
       "oauth_signature_method": "HMAC-SHA1",
-      "oauth_timestamp": t if t else str(int(time())),
-      "oauth_nonce": nonce if nonce else str(getrandbits(64)),
+      "oauth_timestamp": str(int(time())),
+      "oauth_nonce": str(getrandbits(64)),
       "oauth_version": "1.0"
     }
 
@@ -161,7 +147,7 @@ class OAuthClient():
 
     # Join the entire message together per the OAuth specification.
     message = "&".join(["GET" if method == urlfetch.GET else "POST",
-                       encode(url), encode(params_str)])
+                        encode(url), encode(params_str)])
 
     # Create a HMAC-SHA1 signature of the message.
     key = "%s&%s" % (self.consumer_secret, secret) # Note compulsory "&".
@@ -171,9 +157,10 @@ class OAuthClient():
 
     # Construct the request payload and return it
     return urlencode(params)
-
+    
+    
   def make_async_request(self, url, token="", secret="", additional_params=None,
-                         protected=False, method=urlfetch.GET, headers={}):
+                   protected=False, method=urlfetch.GET):
     """Make Request.
 
     Make an authenticated request to any OAuth protected resource.
@@ -181,29 +168,21 @@ class OAuthClient():
     If protected is equal to True, the Authorization: OAuth header will be set.
 
     A urlfetch response object is returned.
-    """
-
+    """      
     payload = self.prepare_request(url, token, secret, additional_params,
                                    method)
-
     if method == urlfetch.GET:
-      url = "%s?%s" % (url, payload)
-      payload = None
-
-    if protected:
-      headers["Authorization"] = "OAuth"
-
+        url = "%s?%s" % (url, payload)
+        payload = None
+    headers = {"Authorization": "OAuth"} if protected else {}
     rpc = urlfetch.create_rpc(deadline=10.0)
-    urlfetch.make_fetch_call(rpc, url, method=method, headers=headers,
-                             payload=payload)
+    urlfetch.make_fetch_call(rpc, url, method=method, headers=headers, payload=payload)
     return rpc
 
   def make_request(self, url, token="", secret="", additional_params=None,
-                   protected=False, method=urlfetch.GET, headers={}):
-
-    return self.make_async_request(url, token, secret, additional_params,
-                                   protected, method, headers).get_result()
-
+                                      protected=False, method=urlfetch.GET):
+    return self.make_async_request(url, token, secret, additional_params, protected, method).get_result()
+  
   def get_authorization_url(self):
     """Get Authorization URL.
 
@@ -242,10 +221,10 @@ class OAuthClient():
         auth_secret = result.secret
 
     response = self.make_request(self.access_url,
-                                 token=auth_token,
-                                 secret=auth_secret,
-                                 additional_params={"oauth_verifier":
-                                                     auth_verifier})
+                                token=auth_token,
+                                secret=auth_secret,
+                                additional_params={"oauth_verifier":
+                                                    auth_verifier})
 
     # Extract the access token/secret from the response.
     result = self._extract_credentials(response)
@@ -349,23 +328,18 @@ class TwitterClient(OAuthClient):
     """Constructor."""
 
     OAuthClient.__init__(self,
-        TWITTER,
+        "twitter",
         consumer_key,
         consumer_secret,
-        "http://api.twitter.com/oauth/request_token",
-        "http://api.twitter.com/oauth/access_token",
+        "http://twitter.com/oauth/request_token",
+        "http://twitter.com/oauth/access_token",
         callback_url)
 
   def get_authorization_url(self):
     """Get Authorization URL."""
 
     token = self._get_auth_token()
-    return "http://api.twitter.com/oauth/authorize?oauth_token=%s" % token
-
-  def get_authenticate_url(self):
-    """Get Authentication URL."""
-    token = self._get_auth_token()
-    return "http://api.twitter.com/oauth/authenticate?oauth_token=%s" % token
+    return "http://twitter.com/oauth/authorize?oauth_token=%s" % token
 
   def _lookup_user_info(self, access_token, access_secret):
     """Lookup User Info.
@@ -374,7 +348,7 @@ class TwitterClient(OAuthClient):
     """
 
     response = self.make_request(
-        "http://api.twitter.com/1.1/account/verify_credentials.json",
+        "http://twitter.com/account/verify_credentials.json",
         token=access_token, secret=access_secret, protected=True)
 
     data = json.loads(response.content)
@@ -399,7 +373,7 @@ class MySpaceClient(OAuthClient):
     """Constructor."""
 
     OAuthClient.__init__(self,
-        MYSPACE,
+        "myspace",
         consumer_key,
         consumer_secret,
         "http://api.myspace.com/request_token",
@@ -445,7 +419,7 @@ class YahooClient(OAuthClient):
     """Constructor."""
 
     OAuthClient.__init__(self,
-        YAHOO,
+        "yahoo",
         consumer_key,
         consumer_secret,
         "https://api.login.yahoo.com/oauth/v2/get_request_token",
@@ -489,145 +463,4 @@ class YahooClient(OAuthClient):
     user_info["name"] = data["nickname"]
     user_info["picture"] = data["image"]["imageUrl"]
 
-    return user_info
-
-
-class DropboxClient(OAuthClient):
-  """Dropbox Client.
-
-  A client for talking to the Dropbox API using OAuth as the authentication
-  model.
-  """
-
-  def __init__(self, consumer_key, consumer_secret, callback_url):
-    """Constructor."""
-
-    OAuthClient.__init__(self,
-        DROPBOX,
-        consumer_key,
-        consumer_secret,
-        "https://api.dropbox.com/0/oauth/request_token",
-        "https://api.dropbox.com/0/oauth/access_token",
-        callback_url)
-
-  def get_authorization_url(self):
-    """Get Authorization URL."""
-
-    token = self._get_auth_token()
-    return ("http://www.dropbox.com/0/oauth/authorize?"
-            "oauth_token=%s&oauth_callback=%s" % (token,
-                                                  urlquote(self.callback_url)))
-
-  def _lookup_user_info(self, access_token, access_secret):
-    """Lookup User Info.
-
-    Lookup the user on Dropbox.
-    """
-
-    response = self.make_request("http://api.dropbox.com/0/account/info",
-                                 token=access_token, secret=access_secret,
-                                 protected=True)
-
-    data = json.loads(response.content)
-    user_info = self._get_default_user_info()
-    user_info["id"] = data["uid"]
-    user_info["name"] = data["display_name"]
-    user_info["country"] = data["country"]
-
-    return user_info
-
-
-class LinkedInClient(OAuthClient):
-  """LinkedIn Client.
-
-  A client for talking to the LinkedIn API using OAuth as the
-  authentication model.
-  """
-
-  def __init__(self, consumer_key, consumer_secret, callback_url):
-    """Constructor."""
-
-    OAuthClient.__init__(self,
-        LINKEDIN,
-        consumer_key,
-        consumer_secret,
-        "https://api.linkedin.com/uas/oauth/requestToken",
-        "https://api.linkedin.com/uas/oauth/accessToken",
-        callback_url)
-
-  def get_authorization_url(self):
-    """Get Authorization URL."""
-
-    token = self._get_auth_token()
-    return ("https://www.linkedin.com/uas/oauth/authenticate?oauth_token=%s"
-            "&oauth_callback=%s" % (token, urlquote(self.callback_url)))
-
-  def _lookup_user_info(self, access_token, access_secret):
-    """Lookup User Info.
-
-    Lookup the user on LinkedIn
-    """
-
-    user_info = self._get_default_user_info()
-
-    # Grab the user's profile from LinkedIn.
-    response = self.make_request("http://api.linkedin.com/v1/people/~:"
-                                 "(picture-url,id,first-name,last-name)",
-                                 token=access_token,
-                                 secret=access_secret,
-                                 protected=False,
-                                 headers={"x-li-format":"json"})
-
-    data = json.loads(response.content)
-    user_info["id"] = data["id"]
-    user_info["picture"] = data["pictureUrl"]
-    user_info["name"] = data["firstName"] + " " + data["lastName"]
-    return user_info
-
-
-class YammerClient(OAuthClient):
-  """Yammer Client.
-
-  A client for talking to the Yammer API using OAuth as the
-  authentication model.
-  """
-
-  def __init__(self, consumer_key, consumer_secret, callback_url):
-    """Constructor."""
-
-    OAuthClient.__init__(self,
-        YAMMER,
-        consumer_key,
-        consumer_secret,
-        "https://www.yammer.com/oauth/request_token",
-        "https://www.yammer.com/oauth/access_token",
-        callback_url)
-
-  def get_authorization_url(self):
-    """Get Authorization URL."""
-
-    token = self._get_auth_token()
-    return ("https://www.yammer.com/oauth/authorize?oauth_token=%s"
-            "&oauth_callback=%s" % (token, urlquote(self.callback_url)))
-
-  def _lookup_user_info(self, access_token, access_secret):
-    """Lookup User Info.
-
-    Lookup the user on Yammer
-    """
-
-    user_info = self._get_default_user_info()
-
-    # Grab the user's profile from Yammer.
-    response = self.make_request("https://www.yammer.com/api/v1/users/current.json",
-                                 token=access_token,
-                                 secret=access_secret,
-                                 protected=False,
-                                 headers={"x-li-format":"json"})
-
-    data = json.loads(response.content)
-    user_info = self._get_default_user_info()
-    user_info["id"] = data["name"]
-    user_info["picture"] = data["mugshot_url"]
-    user_info["name"] = data["full_name"]
     return user_info
