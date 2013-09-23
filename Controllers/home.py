@@ -16,6 +16,9 @@ import urllib2
 import base64
 import oauth
 
+consumer_key = "6hl3xqvrwc5ElShe55hxQ"
+consumer_secret = "v0JYb5XHk2HIVNisHWUjuhmOOWgLWrLlP2FXGtuy4"
+callback_url = "http://opinionext.appspot.com/"
 
 class Articles(ndb.Model):
 	articles = ndb.JsonProperty(repeated=True)
@@ -148,7 +151,24 @@ class Home1(webapp2.RequestHandler):
 		'''
 		
 		
+		client = oauth.TwitterClient(consumer_key, consumer_secret, callback_url)
+		self.redirect(client.get_authorization_url())
+	    auth_token = self.request.get("oauth_token")
+		auth_verifier = self.request.get("oauth_verifier")
+		user_info = client.get_user_info(auth_token, auth_verifier=auth_verifier)
 		
+		client = oauth.TwitterClient(consumer_key, consumer_secret, callback_url)
+
+		additional_params = {
+		  status: "Testing Twitter OAuth",
+		}
+
+		result = client.make_request(
+		    "http://twitter.com/statuses/update.json",
+		    token=client_token,
+		    secret=client_secret,
+		    additional_params=additional_params,
+		    method=urlfetch.POST)
 		
 			
 			
