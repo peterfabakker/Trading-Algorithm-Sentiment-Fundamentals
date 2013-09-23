@@ -153,25 +153,25 @@ class Home1(webapp2.RequestHandler):
 		
 		client = oauth.TwitterClient(consumer_key, consumer_secret, callback_url)
 		self.redirect(client.get_authorization_url())
-	    auth_token = self.request.get("oauth_token")
+		auth_token = self.request.get("oauth_token")
 		auth_verifier = self.request.get("oauth_verifier")
+		print auth_token
+		print auth_verifier
 		user_info = client.get_user_info(auth_token, auth_verifier=auth_verifier)
-		
-		client = oauth.TwitterClient(consumer_key, consumer_secret, callback_url)
 
 		additional_params = {
-		  status: "Testing Twitter OAuth",
+		  q: searchQ,
 		}
 
 		result = client.make_request(
-		    "http://twitter.com/statuses/update.json",
+		    "https://api.twitter.com/1.1/search/tweets",
 		    token=client_token,
 		    secret=client_secret,
 		    additional_params=additional_params,
 		    method=urlfetch.POST)
 		
 			
-			
+		"""	
 		scores=[]
 		counter = 0
 		for	rpc in rpcs2:
@@ -186,6 +186,8 @@ class Home1(webapp2.RequestHandler):
 			articles.articles.append(refcom)
 			articles.put()
 		self.redirect("/home")
+		
+		"""
 			
 
 	
