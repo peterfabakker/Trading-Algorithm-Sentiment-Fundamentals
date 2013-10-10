@@ -285,6 +285,7 @@ class OAuthClient():
     if not (token and secret) or result.status_code != 200:
       logging.error("Could not extract token/secret: %s" % result.content)
       raise OAuthException("Problem talking to the service")
+      print result.status_code
 
     return {
       "service": self.service_name,

@@ -150,36 +150,53 @@ class Home1(webapp2.RequestHandler):
 			
 		'''
 		
+		consumerKey = "6hl3xqvrwc5ElShe55hxQ"
+		consumerSecret = "v0JYb5XHk2HIVNisHWUjuhmOOWgLWrLlP2FXGtuy4"
 		
-		client = oauth.TwitterClient(consumer_key, consumer_secret, callback_url)
-		self.redirect(client.get_authorization_url())
-		auth_token = self.request.get("oauth_token")
-		auth_verifier = self.request.get("oauth_verifier")
-		print auth_token
-		print auth_verifier
-		user_info = client.get_user_info(auth_token, auth_verifier=auth_verifier)
-
-		additional_params = {
-		  q: searchQ,
-		}
-
-		result = client.make_request(
-		    "https://api.twitter.com/1.1/search/tweets",
-		    token=client_token,
-		    secret=client_secret,
-		    additional_params=additional_params,
-		    method=urlfetch.POST)
+		key = consumerKey + ":" + consumerSecret
 		
+		api_key = base64.b64encode(key)
+		
+		
+		url = "https://api.twitter.com/oauth2/token"
+		rpc = urlfetch.create_rpc(deadline=60)
+		urlfetch.make_fetch_call(rpc,url,method=urlfetch.POST,headers={"Authorization": "Basic %s" %api_key},payload="grant_type=client_credentials")
+		result = rpc.get_result()
+		result = json.loads(result.content)
+		accessToken = result["access_token"]
+		
+		
+
+		q = 'aapl'
+		query = urllib.quote(q)
+		url = "https://api.twitter.com/1.1/search/tweets.json?q="+ query 
+		rpc = urlfetch.create_rpc()
+		urlfetch.make_fetch_call(rpc,url,headers={"Authorization": "bearer %s" %accessToken})
+		result = rpc.get_result()
+		result = json.loads(result.content)
+		tweets = result
+		
+	
+		rpcs2 = []
+		for tweet in result['statuses']:
+			payload = []
+			payload.append(MultipartParam("text", tweet['text']))
+			data, headers = multipart_encode(payload)
+			del headers['Content-Length']
+			url = "http://text-processing.com/api/sentiment/"
+			rpc = urlfetch.create_rpc()
+			urlfetch.make_fetch_call(rpc,url,payload =str().join(data),method = urlfetch.POST,headers = headers)
+			rpcs2.append(rpc)
 			
-		"""	
 		scores=[]
 		counter = 0
 		for	rpc in rpcs2:
 			result = rpc.get_result()
 			print result.status_code
 			result = json.loads(result.content)
+			print result
 			label = result['label']
-			refcom = {'label':result['label'],'probability':result['probability'][label],'title':textTitle[counter]['title'],'url':urls[counter]['url'],'searchQ':searchQ}			
+			refcom = {'label':result['label'],'probability':result['probability'][label],'tweet':tweets['statuses'][counter]['text'],'stock':q}			
 			scores.append(refcom)
 			counter += 1
 			articles = Articles()
@@ -187,11 +204,31 @@ class Home1(webapp2.RequestHandler):
 			articles.put()
 		self.redirect("/home")
 		
-		"""
 			
+		"""	
+		
+			client = oauth.TwitterClient(consumer_key, consumer_secret, callback_url)
+			self.redirect(client.get_authorization_url())
 
-	
+			additional_params = {
+			  q: searchQ,
+			}
+
+			result = client.make_request(
+			    "https://api.twitter.com/1.1/search/tweets",
+			    token=client_token,
+			    secret=client_secret,
+			    additional_params=additional_params,
+			    method=urlfetch.POST)
+		
+	class CallbackHandler(webapp2.RequestHandler):
+		def get(self):
+			client = oauth.TwitterClient(consumer_key, consumer_secret, callback_url)
+			auth_token = self.request.get("oauth_token")
+			auth_verifier = self.request.get("oauth_verifier")
+			user_info = client.get_user_info(auth_token, auth_verifier=auth_verifier)
 			
+			"""
 			
 		
 			
