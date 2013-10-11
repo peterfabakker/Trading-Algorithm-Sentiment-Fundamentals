@@ -13,20 +13,21 @@
 <button type="submit" class="btn btn-info" >	Analyze </button>
 
 </form>
-<ol class="tweets">
 
 {% for tweet in query[0] %}
+<ol class="tweets">
+
 	<h3>{{tweet.created}}</h3>
 	{% for tweet in tweet.articles[0] %}
 	<li>{{tweet['tweet']}}, <span id="label" class="label label-warning">{{tweet['label']}}</span> ,<span class="label label-info">{{tweet['probability']}}</span></li>
 	{% endfor %}
 	
+</ol>
 
 {% endfor %}
 
 
 
-</ol>
 
 <script>
 YUI().use('node', function (Y) {
