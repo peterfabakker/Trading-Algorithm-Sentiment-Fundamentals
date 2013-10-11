@@ -14,7 +14,6 @@ import json
 from poster.encode import multipart_encode, MultipartParam
 import urllib2
 import base64
-import oauth
 
 consumer_key = "6hl3xqvrwc5ElShe55hxQ"
 consumer_secret = "v0JYb5XHk2HIVNisHWUjuhmOOWgLWrLlP2FXGtuy4"
@@ -22,6 +21,8 @@ callback_url = "http://opinionext.appspot.com/"
 
 class Articles(ndb.Model):
 	articles = ndb.JsonProperty(repeated=True)
+	created = ndb.DateTimeProperty(auto_now_add=True)
+	
 
 	
 
@@ -49,8 +50,8 @@ class Home1(webapp2.RequestHandler):
 			'''
 		path = self.request.path
 
-		query = Articles().query()
-		query = query.fetch_page(5)
+		query = Articles().query().order(-Articles.created)
+		query = query.fetch_page(100)
 
 		tmp = "home22.html"
 
@@ -73,7 +74,6 @@ class Home1(webapp2.RequestHandler):
 	def post(self):
 		
 		text = self.request.get("opinion")
-		searchQ = self.request.get("searchQ")
 		
 
 		'''
@@ -166,10 +166,10 @@ class Home1(webapp2.RequestHandler):
 		accessToken = result["access_token"]
 		
 		
-
-		q = 'aapl'
+		searchQ = self.request.get("searchQ")
+		q = searchQ
 		query = urllib.quote(q)
-		url = "https://api.twitter.com/1.1/search/tweets.json?q="+ query 
+		url = "https://api.twitter.com/1.1/search/tweets.json?q="+ query +"&lang=en"
 		rpc = urlfetch.create_rpc()
 		urlfetch.make_fetch_call(rpc,url,headers={"Authorization": "bearer %s" %accessToken})
 		result = rpc.get_result()
@@ -199,9 +199,11 @@ class Home1(webapp2.RequestHandler):
 			refcom = {'label':result['label'],'probability':result['probability'][label],'tweet':tweets['statuses'][counter]['text'],'stock':q}			
 			scores.append(refcom)
 			counter += 1
-			articles = Articles()
-			articles.articles.append(refcom)
-			articles.put()
+		
+		
+		articles = Articles()
+		articles.articles.append(scores)
+		articles.put()
 		self.redirect("/home")
 		
 			

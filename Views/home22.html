@@ -12,14 +12,41 @@
 <br>
 <button type="submit" class="btn btn-info" >	Analyze </button>
 
-{{query}}
 </form>
-{% for article in query.articles %}
-<ul>
-	<li>{{article}}</li>
-</ul>
+<ol class="tweets">
+
+{% for tweet in query[0] %}
+	<h3>{{tweet.created}}</h3>
+	{% for tweet in tweet.articles[0] %}
+	<li>{{tweet['tweet']}}, <span id="label" class="label label-warning">{{tweet['label']}}</span> ,<span class="label label-info">{{tweet['probability']}}</span></li>
+	{% endfor %}
+	
+
 {% endfor %}
 
+
+
+</ol>
+
+<script>
+YUI().use('node', function (Y) {
+	var positive = Y.all('#label')
+	console.log(positive)
+	for (i=0;i<positive.size();i++){
+		if (positive['_nodes'][i]['innerHTML'] == "pos") {
+			positive['_nodes'][i]['className'] = "badge badge-success"
+		};
+		if (positive['_nodes'][i]['innerHTML'] == "neutral") {
+			positive['_nodes'][i]['className'] = "badge"
+		};
+		if (positive['_nodes'][i]['innerHTML'] == "neg") {
+			positive['_nodes'][i]['className'] = "label label-important"
+		};
+		
+	}
+
+});
+</script>
 
 
 
