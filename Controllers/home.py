@@ -15,11 +15,13 @@ from poster.encode import multipart_encode, MultipartParam
 import urllib2
 import base64
 import re
-
+from collections import OrderedDict
+import csv
 
 class Articles(ndb.Model):
 	articles = ndb.JsonProperty(repeated=True)
 	created = ndb.DateTimeProperty(auto_now_add=True)
+	stockInfo = ndb.JsonProperty(repeated=True)
 
 class Home1(webapp2.RequestHandler):
 
@@ -92,6 +94,7 @@ class Home1(webapp2.RequestHandler):
 			urlfetch.make_fetch_call(rpc,url,payload =form_data,method = urlfetch.POST,headers = headers)
 			rpcs2.append(rpc)
 		
+		
 		#Get Fundmentals from Yahoo Finance
 		
 		fData={
@@ -109,18 +112,23 @@ class Home1(webapp2.RequestHandler):
 		
 		url="http://finance.yahoo.com/d/quotes.csv?s="+stockList+"&f="+fData['sSymbol']+fData['priceToSales']+fData['peRatio']+fData['pegRatio']+fData['priceEpsCurrentYear']+fData['priceBook']
 		result = urlfetch.fetch(url=url,method=urlfetch.GET)
-		print result.content
 		
-		#breakdown results for each stock into a seprate list
+		#breakdown results into a list of lists
 		info = result.content
 		info = re.split("\r|\n",info)
 		info = [s for s in info if s != '']
+		infoList = []
+		for i in info:
+			infoList.append(i.split(','))
+		print infoList
 		
+		#Turn info into a well structured Dictionary		
 		dInfo = {}
-		dInfo[info[0][0]] = {}
-		
-		
-		print info
+		tData = fData.keys()
+		for i in infoList:
+				i[0] = str(i[0])
+				i[0] = i[0].replace('"','')
+				dInfo.update({i[0]:{tData[2]:i[1],tData[3]:i[2],tData[0]:i[3],tData[1]:i[4],tData[5]:i[5]}})
 		print dInfo
 		
 		stockInfo= {}
@@ -152,14 +160,10 @@ class Home1(webapp2.RequestHandler):
 		articles = Articles()
 		articles.articles.append(scores)
 		articles.put()
-		
 		#Redirect Home Where the Results Are displayed
 		self.redirect("/home")
 		
 
-			
-		
-		
 		
 		
 		
