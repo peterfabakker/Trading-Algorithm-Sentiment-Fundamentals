@@ -34,13 +34,13 @@ YUI().use('node', function (Y) {
 	var positive = Y.all('#label')
 	console.log(positive)
 	for (i=0;i<positive.size();i++){
-		if (positive['_nodes'][i]['innerHTML'] == "pos") {
+		if (positive['_nodes'][i]['innerHTML'] == "positive") {
 			positive['_nodes'][i]['className'] = "badge badge-success"
 		};
 		if (positive['_nodes'][i]['innerHTML'] == "neutral") {
 			positive['_nodes'][i]['className'] = "badge"
 		};
-		if (positive['_nodes'][i]['innerHTML'] == "neg") {
+		if (positive['_nodes'][i]['innerHTML'] == "negative") {
 			positive['_nodes'][i]['className'] = "label label-important"
 		};
 		
