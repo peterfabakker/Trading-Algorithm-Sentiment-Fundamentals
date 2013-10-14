@@ -131,16 +131,8 @@ class Home1(webapp2.RequestHandler):
 				dInfo.update({i[0]:{tData[2]:i[1],tData[3]:i[2],tData[0]:i[3],tData[1]:i[4],tData[5]:i[5]}})
 		print dInfo
 		
-		stockInfo= {}
-		#for s in result.content:
-			#print s
-			#tfData = fData.keys()
-			#for i in tfData:
-				#stockInfo[i] = s
-
-		#print stockInfo
 		
-		#Store Results in the Database		
+		#get info made by asc requests earlier and prepare
 		scores=[]
 		counter = 0
 		for	rpc in rpcs2:
@@ -156,7 +148,7 @@ class Home1(webapp2.RequestHandler):
 			scores.append(refcom)
 			counter += 1
 		
-		
+		#upload info to the database
 		articles = Articles()
 		articles.articles.append(scores)
 		articles.put()
