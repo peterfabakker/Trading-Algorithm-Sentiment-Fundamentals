@@ -80,6 +80,8 @@ class Home1(webapp2.RequestHandler):
 		articleTexts = diffbot.getText()
 		print articleTexts
 		
+		alchemy = alchemy(articleTexts)
+		
 		#Use Token To Get Tweets
 		q = searchQ
 		query = urllib.quote(q)
