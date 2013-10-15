@@ -17,6 +17,9 @@ import base64
 import re
 from collections import OrderedDict
 import csv
+from Controllers import BingAPI
+from Controllers import Diffbot
+
 
 class Articles(ndb.Model):
 	articles = ndb.JsonProperty(repeated=True)
@@ -67,6 +70,15 @@ class Home1(webapp2.RequestHandler):
 		
 		#Get Stock Symbol
 		searchQ = self.request.get("searchQ")
+		
+		#getting articles from bing
+		bing = BingAPI(searchQ,5)
+		urls = bing.getArticles()
+		
+		#using diffbot to extract article texts for analysis
+		diffbot = Diffbot(urls)
+		articleTexts = diffbot.getText()
+		print articleTexts
 		
 		#Use Token To Get Tweets
 		q = searchQ
@@ -137,6 +149,7 @@ class Home1(webapp2.RequestHandler):
 		counter = 0
 		for	rpc in rpcs2:
 			result = rpc.get_result()
+			print result.status_code
 			result = json.loads(result.content)
 			label = result['docSentiment']['type']
 			

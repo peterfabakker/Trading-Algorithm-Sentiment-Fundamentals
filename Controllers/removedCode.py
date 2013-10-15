@@ -33,13 +33,15 @@ result = rpc.get_result()
 print result.status_code
 result = json.loads(result.content)
 
-rpcs = []
-urls = []
-textTitle=[]
+
 '''
 
 #Extracting Articles using Diffbot
 '''
+rpcs = []
+urls = []
+textTitle=[]
+
 for article in result['d']['results']:
 	pageurl = article['Url']
 	refcom = {'url':pageurl}
