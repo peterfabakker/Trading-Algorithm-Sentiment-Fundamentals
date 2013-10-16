@@ -145,7 +145,7 @@ class Home1(webapp2.RequestHandler):
 				dInfo.update({i[0]:{tData[2]:i[1],tData[3]:i[2],tData[0]:i[3],tData[1]:i[4],tData[5]:i[5]}})
 		print dInfo
 		
-		
+		'''
 		#get info made by asc requests earlier and prepare
 		scores=[]
 		counter = 0
@@ -162,6 +162,7 @@ class Home1(webapp2.RequestHandler):
 			refcom = {'label':result['docSentiment']['type'],'probability':s,'tweet':tweets['statuses'][counter]['text'],'stock':q}			
 			scores.append(refcom)
 			counter += 1
+		'''
 		
 		#upload info to the database
 		articles = Articles()

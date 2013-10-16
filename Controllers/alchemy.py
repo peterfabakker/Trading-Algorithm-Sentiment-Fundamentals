@@ -50,11 +50,18 @@ class Alchemy(object):
 					s = result['docSentiment']['score']
 				except KeyError:
 					s = ""
-					
 				try:
-					text = 
+					text = content['statuses'][counter]['text']
+				except KeyError:
+					text = content[counter]['text']
+				try:
+					title = content[counter]['title']
+				except KeyError:
+					title = ""
 					
-				refcom = {'label':result['docSentiment']['type'],'probability':s,'tweet':tweets['statuses'][counter]['text'],'stock':q}			
+				refcom = {'label':result['docSentiment']['type'],'probability':s,'text':text,'title':title,'stock':q}			
 				scores.append(refcom)
 				counter += 1
+				
+				return scores
 			
