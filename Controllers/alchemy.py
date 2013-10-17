@@ -51,10 +51,12 @@ class Alchemy(object):
 		counter = 0
 		for	rpc in rpcs2:
 			result = rpc.get_result()
-			print result.status_code
 			result = json.loads(result.content)
-			label = result['docSentiment']['type']
-
+			print result
+			try:
+				label = result['docSentiment']['type']
+			except KeyError:
+				pass
 			try:
 				s = result['docSentiment']['score']
 			except KeyError:
@@ -68,9 +70,9 @@ class Alchemy(object):
 			except KeyError:
 				title = ""
 					
-			refcom = {'label':result['docSentiment']['type'],'probability':s,'text':text,'title':title,'stock':q}
+			refcom = {'label':label,'probability':s,'text':text,'title':title,'stock':q}
 			scores.append(refcom)
 			counter += 1
-				
+			
 		return scores
 			

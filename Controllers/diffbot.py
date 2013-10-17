@@ -8,7 +8,7 @@ import json
 
 class Diffbot(object):
 	#Extracting Articles using Diffbot
-	#pass the urls of the articles you got from diffbot
+	#pass the urls of the articles you got from bing
 	def __init__(self,urls):
 		self.urls = urls
 		
@@ -25,7 +25,6 @@ class Diffbot(object):
 		for rpc in self.rpcs:
 			result = rpc.get_result()
 			result = json.loads(result.content)
-			print result
 			try:
 				refcom = {'title':result['title'],'text':result['text']}
 			except KeyError:

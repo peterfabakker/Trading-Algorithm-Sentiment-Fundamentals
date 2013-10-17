@@ -21,7 +21,6 @@ class BingAPI(object):
 		rpc = urlfetch.create_rpc()
 		urlfetch.make_fetch_call(rpc,url, headers={"Authorization": "Basic %s" %api_key})
 		result = rpc.get_result()
-		print result.status_code
 		result = json.loads(result.content)
 				
 		urls = []

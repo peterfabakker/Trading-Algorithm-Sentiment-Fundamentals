@@ -85,11 +85,8 @@ class Home1(webapp2.RequestHandler):
 		alchemy = Alchemy(articleTexts)
 		request = alchemy.getSentiment()
 		bingData = alchemy.extractResults(request,searchQ)
+	
 		
-		print bingData
-		
-		
-		'''
 		#Use Token To Get Tweets
 		q = searchQ
 		query = urllib.quote(q)
@@ -100,24 +97,14 @@ class Home1(webapp2.RequestHandler):
 		result = json.loads(result.content)
 		tweets = result
 		
-		#Analyze Sentiment Using Alchemy API 	
-		rpcs2 = []
-		for tweet in result['statuses']:
-			tt = tweet['text'].encode('utf')
-			form_fields = {
-			 "apikey": "a774b58e3c5111910e283381321bf027a1bb460c",
-			 "text": tt,
-			 "outputMode": "json"
-			}
-			form_data = urllib.urlencode(form_fields)
-			url = "http://access.alchemyapi.com/calls/text/TextGetTextSentiment"
-			headers={'Content-Type': 'application/x-www-form-urlencoded'}
-			rpc = urlfetch.create_rpc()
-			urlfetch.make_fetch_call(rpc,url,payload =form_data,method = urlfetch.POST,headers = headers)
-			rpcs2.append(rpc)
-		'''
+		print tweets
 		
+		#alchemy Twitter
+		talchemy = Alchemy(tweets)
+		trequest = talchemy.getSentiment()
+		twitterData = talchemy.extractResults(trequest,searchQ)
 		
+		print twitterData
 		
 		#Get Fundmentals from Yahoo Finance
 		
