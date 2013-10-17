@@ -84,7 +84,7 @@ class Home1(webapp2.RequestHandler):
 		#alchemy Bing
 		alchemy = Alchemy(articleTexts)
 		request = alchemy.getSentiment()
-		bingData = alchemy.extractResults()
+		bingData = alchemy.extractResults(request,searchQ)
 		
 		print bingData
 		
