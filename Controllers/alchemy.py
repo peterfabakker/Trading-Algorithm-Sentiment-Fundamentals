@@ -20,7 +20,7 @@ class Alchemy(object):
 				rpc = urlfetch.create_rpc()
 				urlfetch.make_fetch_call(rpc,url,payload =form_data,method = urlfetch.POST,headers = headers)
 				rpcs2.append(rpc)
-		except KeyError:
+		except (KeyError,TypeError):
 			rpcs2 = []
 			for content in self.content:
 				form_fields = {
