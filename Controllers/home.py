@@ -19,6 +19,7 @@ from collections import OrderedDict
 import csv
 from Controllers import BingAPI
 from Controllers import Diffbot
+from Controllers import Alchemy
 
 
 class Articles(ndb.Model):
@@ -78,10 +79,17 @@ class Home1(webapp2.RequestHandler):
 		#using diffbot to extract article texts for analysis
 		diffbot = Diffbot(urls)
 		articleTexts = diffbot.getText()
-		print articleTexts
+		#print articleTexts
 		
-		alchemy = alchemy(articleTexts)
+		#alchemy Bing
+		alchemy = Alchemy(articleTexts)
+		request = alchemy.getSentiment()
+		bingData = alchemy.extractResults()
 		
+		print bingData
+		
+		
+		'''
 		#Use Token To Get Tweets
 		q = searchQ
 		query = urllib.quote(q)
@@ -107,6 +115,8 @@ class Home1(webapp2.RequestHandler):
 			rpc = urlfetch.create_rpc()
 			urlfetch.make_fetch_call(rpc,url,payload =form_data,method = urlfetch.POST,headers = headers)
 			rpcs2.append(rpc)
+		'''
+		
 		
 		
 		#Get Fundmentals from Yahoo Finance
@@ -146,7 +156,7 @@ class Home1(webapp2.RequestHandler):
 		print dInfo
 		
 		'''
-		#get info made by asc requests earlier and prepare
+		#get info made by earlier asc requests and prepare info for database
 		scores=[]
 		counter = 0
 		for	rpc in rpcs2:
@@ -162,12 +172,13 @@ class Home1(webapp2.RequestHandler):
 			refcom = {'label':result['docSentiment']['type'],'probability':s,'tweet':tweets['statuses'][counter]['text'],'stock':q}			
 			scores.append(refcom)
 			counter += 1
-		'''
 		
 		#upload info to the database
 		articles = Articles()
 		articles.articles.append(scores)
 		articles.put()
+		'''
+		
 		#Redirect Home Where the Results Are displayed
 		self.redirect("/home")
 		

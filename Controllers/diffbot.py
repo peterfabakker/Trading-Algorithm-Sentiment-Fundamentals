@@ -24,9 +24,12 @@ class Diffbot(object):
 
 		for rpc in self.rpcs:
 			result = rpc.get_result()
-			print result.status_code
 			result = json.loads(result.content)
-			refcom = {'title':result['title'],'text':result['text']}
+			print result
+			try:
+				refcom = {'title':result['title'],'text':result['text']}
+			except KeyError:
+				pass
 			textTitle.append(refcom)
 		
 		return textTitle
