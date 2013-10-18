@@ -52,7 +52,6 @@ class Alchemy(object):
 		for	rpc in rpcs2:
 			result = rpc.get_result()
 			result = json.loads(result.content)
-			print result
 			try:
 				label = result['docSentiment']['type']
 			except KeyError:
