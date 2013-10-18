@@ -8,12 +8,11 @@
 
 <form class="" method="post" enctype="multipart/form-data" action="/home">
 
-<input name="searchQ" type="text" placeholder="searchQ" x-webkit-speech/>
-<br>
-<button type="submit" class="btn btn-info" >	Analyze </button>
+	<input name="searchQ" type="text" placeholder="searchQ" x-webkit-speech/>
+	<br>
+	<button type="submit" class="btn btn-info" >	Analyze </button>
 
 </form>
-
 
 {% for tweet in query[0] %}
 <h5>{{tweet.created}}</h5>
@@ -21,14 +20,23 @@
 <ol class="tweets">
 	{% for article in tweet.articles %}
 	<li id="article">{{article['title']}}, <span id="label" class="label label-warning">{{article['label']}}</span> ,<span class="label label-info">{{article['probability']}}</span></li>
-	<div id="aText">{{article['text']}}</div>
+	<div id="aText" >{{article['text']}}</div>
 	{% endfor %}
 	
 </ol>
+
 <h4>Tweets</h4>
 <ol class="tweets">
 	{% for tweet in tweet.tweets %}
 	<li>{{tweet['text']}}, <span id="label" class="label label-warning">{{tweet['label']}}</span> ,<span class="label label-info">{{tweet['probability']}}</span></li>
+	{% endfor %}
+	
+</ol>
+
+<h4>Fundamentals</h4>
+<ol class="tweets">
+	{% for stock in tweet.stockInfo %}
+		<li>Stock: {{stock}}, PE Ratio:{{tweet.stockInfo[stock]['peRatio']}}, Price Eps Current Year:{{tweet.stockInfo[stock]['priceEpsCurrentYear']}}, PEG Ratio: {{tweet.stockInfo[stock]['pegRatio']}} </li>
 	{% endfor %}
 	
 </ol>
@@ -53,14 +61,12 @@ YUI().use('node','event', function (Y) {
 		};
 		
 	}
-
+	Y.all('#aText').hide();
 	Y.all("#article").on("click", function (e) {
 		e.target.next("div").toggleView()
 	},'button');
 
 });
-
-
 
 </script>
 
