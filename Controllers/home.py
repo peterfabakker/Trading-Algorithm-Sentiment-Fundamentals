@@ -23,9 +23,10 @@ from Controllers import Alchemy
 
 
 class Articles(ndb.Model):
-	articles = ndb.JsonProperty(repeated=True)
+	articles = ndb.JsonProperty()
+	tweets = ndb.JsonProperty()
 	created = ndb.DateTimeProperty(auto_now_add=True)
-	stockInfo = ndb.JsonProperty(repeated=True)
+	stockInfo = ndb.JsonProperty()
 
 class Home1(webapp2.RequestHandler):
 
@@ -85,11 +86,9 @@ class Home1(webapp2.RequestHandler):
 		alchemy = Alchemy(articleTexts)
 		request = alchemy.getSentiment()
 		bingData = alchemy.extractResults(request,searchQ)
-		
+	
 		print bingData
 		
-		
-		'''
 		#Use Token To Get Tweets
 		q = searchQ
 		query = urllib.quote(q)
@@ -100,24 +99,13 @@ class Home1(webapp2.RequestHandler):
 		result = json.loads(result.content)
 		tweets = result
 		
-		#Analyze Sentiment Using Alchemy API 	
-		rpcs2 = []
-		for tweet in result['statuses']:
-			tt = tweet['text'].encode('utf')
-			form_fields = {
-			 "apikey": "a774b58e3c5111910e283381321bf027a1bb460c",
-			 "text": tt,
-			 "outputMode": "json"
-			}
-			form_data = urllib.urlencode(form_fields)
-			url = "http://access.alchemyapi.com/calls/text/TextGetTextSentiment"
-			headers={'Content-Type': 'application/x-www-form-urlencoded'}
-			rpc = urlfetch.create_rpc()
-			urlfetch.make_fetch_call(rpc,url,payload =form_data,method = urlfetch.POST,headers = headers)
-			rpcs2.append(rpc)
-		'''
 		
+		#alchemy Twitter
+		talchemy = Alchemy(tweets)
+		trequest = talchemy.getSentiment()
+		twitterData = talchemy.extractResults(trequest,searchQ)
 		
+		print twitterData
 		
 		#Get Fundmentals from Yahoo Finance
 		
@@ -144,7 +132,6 @@ class Home1(webapp2.RequestHandler):
 		infoList = []
 		for i in info:
 			infoList.append(i.split(','))
-		print infoList
 		
 		#Turn info into a well structured Dictionary		
 		dInfo = {}
@@ -155,29 +142,14 @@ class Home1(webapp2.RequestHandler):
 				dInfo.update({i[0]:{tData[2]:i[1],tData[3]:i[2],tData[0]:i[3],tData[1]:i[4],tData[5]:i[5]}})
 		print dInfo
 		
-		'''
 		#get info made by earlier asc requests and prepare info for database
-		scores=[]
-		counter = 0
-		for	rpc in rpcs2:
-			result = rpc.get_result()
-			print result.status_code
-			result = json.loads(result.content)
-			label = result['docSentiment']['type']
-			
-			try:
-				s = result['docSentiment']['score']
-			except KeyError:
-				s = ""
-			refcom = {'label':result['docSentiment']['type'],'probability':s,'tweet':tweets['statuses'][counter]['text'],'stock':q}			
-			scores.append(refcom)
-			counter += 1
 		
 		#upload info to the database
 		articles = Articles()
-		articles.articles.append(scores)
+		articles.tweets = twitterData
+		articles.articles = bingData
+		articles.stockInfo = dInfo
 		articles.put()
-		'''
 		
 		#Redirect Home Where the Results Are displayed
 		self.redirect("/home")

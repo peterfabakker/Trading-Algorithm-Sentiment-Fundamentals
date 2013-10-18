@@ -14,12 +14,21 @@
 
 </form>
 
-{% for tweet in query[0] %}
-<ol class="tweets">
 
-	<h3>{{tweet.created}}</h3>
-	{% for tweet in tweet.articles[0] %}
-	<li>{{tweet['tweet']}}, <span id="label" class="label label-warning">{{tweet['label']}}</span> ,<span class="label label-info">{{tweet['probability']}}</span></li>
+{% for tweet in query[0] %}
+<h5>{{tweet.created}}</h5>
+<h4>Articles</h4>
+<ol class="tweets">
+	{% for article in tweet.articles %}
+	<li id="article">{{article['title']}}, <span id="label" class="label label-warning">{{article['label']}}</span> ,<span class="label label-info">{{article['probability']}}</span></li>
+	<div id="aText">{{article['text']}}</div>
+	{% endfor %}
+	
+</ol>
+<h4>Tweets</h4>
+<ol class="tweets">
+	{% for tweet in tweet.tweets %}
+	<li>{{tweet['text']}}, <span id="label" class="label label-warning">{{tweet['label']}}</span> ,<span class="label label-info">{{tweet['probability']}}</span></li>
 	{% endfor %}
 	
 </ol>
@@ -30,9 +39,8 @@
 
 
 <script>
-YUI().use('node', function (Y) {
+YUI().use('node','event', function (Y) {
 	var positive = Y.all('#label')
-	console.log(positive)
 	for (i=0;i<positive.size();i++){
 		if (positive['_nodes'][i]['innerHTML'] == "positive") {
 			positive['_nodes'][i]['className'] = "badge badge-success"
@@ -46,7 +54,14 @@ YUI().use('node', function (Y) {
 		
 	}
 
+	Y.all("#article").on("click", function (e) {
+		e.target.next("div").toggleView()
+	},'button');
+
 });
+
+
+
 </script>
 
 
