@@ -70,22 +70,34 @@ class Home1(webapp2.RequestHandler):
 		result = json.loads(result.content)
 		accessToken = result["access_token"]
 		
-		#Get Stock Symbol
+		#Get Stock Symbols
 		searchQ = self.request.get("searchQ")
 		
-		#getting articles from bing
-		bing = BingAPI(searchQ,5)
-		urls = bing.getArticles()
+		#turn it into a list
+		searchQ = searchQ.split(",")
 		
+		#getting articles from bing
+		bingInfo = []
+		for q in searchQ:
+			bing = BingAPI(q,5)
+			urls = bing.getArticles()
+			bingInfo.append(urls)
+		
+			
 		#using diffbot to extract article texts for analysis
-		diffbot = Diffbot(urls)
-		articleTexts = diffbot.getText()
-		#print articleTexts
+		aTexts=[]
+		for a in bingInfo:
+			diffbot = Diffbot(a)
+			articleTexts = diffbot.getText()
+			aTexts.append(articleTexts)
 		
 		#alchemy Bing
-		alchemy = Alchemy(articleTexts)
-		request = alchemy.getSentiment()
-		bingData = alchemy.extractResults(request,searchQ)
+		sScores  = []
+		for a in aTexts:
+			alchemy = Alchemy(a)
+			request = alchemy.getSentiment()
+			bingData = alchemy.extractResults(request,searchQ)
+			sScores.append(bingData)
 	
 		print bingData
 		
