@@ -20,6 +20,7 @@ import csv
 from Controllers import BingAPI
 from Controllers import Diffbot
 from Controllers import Alchemy
+from Controllers import Tweets
 
 
 class Articles(ndb.Model):
@@ -74,11 +75,11 @@ class Home1(webapp2.RequestHandler):
 		searchQ = self.request.get("searchQ")
 		
 		#turn it into a list
-		searchQ = searchQ.split(",")
+		query = searchQ.split(",")
 		
 		#getting articles from bing
 		bingInfo = []
-		for q in searchQ:
+		for q in query:
 			bing = BingAPI(q,5)
 			urls = bing.getArticles()
 			bingInfo.append(urls)
@@ -92,32 +93,38 @@ class Home1(webapp2.RequestHandler):
 			aTexts.append(articleTexts)
 		
 		#alchemy Bing
-		sScores  = []
+		aScores  = []
 		for a in aTexts:
 			alchemy = Alchemy(a)
 			request = alchemy.getSentiment()
-			bingData = alchemy.extractResults(request,searchQ)
-			sScores.append(bingData)
+			bingData = alchemy.extractResults(request,query)
+			aScores.append(bingData)
 	
 		print bingData
 		
 		#Use Token To Get Tweets
-		q = searchQ
-		query = urllib.quote(q)
-		url = "https://api.twitter.com/1.1/search/tweets.json?q="+ query +"&lang=en"
-		rpc = urlfetch.create_rpc()
-		urlfetch.make_fetch_call(rpc,url,headers={"Authorization": "bearer %s" %accessToken})
-		result = rpc.get_result()
-		result = json.loads(result.content)
-		tweets = result
+		lTweets = []
+		for t in query:
+			twitter = Tweets(t,accessToken)
+			tweets = twitter.getTweets()
+			lTweets.append(tweets)
 		
+		tScores = []
+		for s in lTweets:
+			#alchemy Twitter
+			talchemy = Alchemy(tweets)
+			trequest = talchemy.getSentiment()
+			twitterData = talchemy.extractResults(trequest,query)
+			tScores.append(twitterData)
 		
-		#alchemy Twitter
-		talchemy = Alchemy(tweets)
-		trequest = talchemy.getSentiment()
-		twitterData = talchemy.extractResults(trequest,searchQ)
+		print tScores
+		print aScores
 		
-		print twitterData
+		stockCount = aScores.length/5
+		
+		for i in aScores:
+			
+			
 		
 		#Get Fundmentals from Yahoo Finance
 		
@@ -130,7 +137,7 @@ class Home1(webapp2.RequestHandler):
 		"priceBook":"p6"
 		}
 		
-		stockList = "bbry,aapl,ge,msft"
+		stockList = searchQ
 		
 		stockList = stockList.replace(",","+")
 		
@@ -154,12 +161,11 @@ class Home1(webapp2.RequestHandler):
 				dInfo.update({i[0]:{tData[2]:i[1],tData[3]:i[2],tData[0]:i[3],tData[1]:i[4],tData[5]:i[5]}})
 		print dInfo
 		
-		#get info made by earlier asc requests and prepare info for database
 		
 		#upload info to the database
 		articles = Articles()
-		articles.tweets = twitterData
-		articles.articles = bingData
+		articles.tweets = tScores
+		articles.articles = aScores
 		articles.stockInfo = dInfo
 		articles.put()
 		
