@@ -85,7 +85,7 @@ class Home1(webapp2.RequestHandler):
 			bingInfo.append(urls)
 		
 			
-		#using diffbot to extract article texts for analysis
+		#using diffbot to extract article texts' for analysis
 		aTexts=[]
 		for a in bingInfo:
 			diffbot = Diffbot(a)
@@ -119,13 +119,7 @@ class Home1(webapp2.RequestHandler):
 		
 		print tScores
 		print aScores
-		
-		stockCount = aScores.length/5
-		
-		for i in aScores:
-			
-			
-		
+
 		#Get Fundmentals from Yahoo Finance
 		
 		fData={
