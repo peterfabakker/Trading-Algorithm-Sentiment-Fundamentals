@@ -21,15 +21,15 @@ class Diffbot(object):
 			rpc = urlfetch.create_rpc(deadline=60)
 			urlfetch.make_fetch_call(rpc,url, headers={})
 			self.rpcs.append(rpc)
-
+		counter = 0
 		for rpc in self.rpcs:
 			result = rpc.get_result()
 			result = json.loads(result.content)
 			try:
-				refcom = {'title':result['title'],'text':result['text']}
+				refcom = {'title':result['title'],'text':result['text'],'stock':self.urls[counter][stock]}
 			except KeyError:
 				pass
 			textTitle.append(refcom)
-		
+			counter += 1
 		return textTitle
 	

@@ -27,7 +27,7 @@ class BingAPI(object):
 		
 		for article in result['d']['results']:
 			pageurl = article['Url']
-			refcom = {'url':pageurl}
+			refcom = {'url':pageurl, 'stock':self.searchQ}
 			urls.append(refcom)
 			
 		return urls
